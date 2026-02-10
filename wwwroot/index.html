@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="tr">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Maliyet Dashboard</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">IFS</div>
+        <div class="brandText">
+          <div class="brandTitle">MEKA: Kırma Eleme ve Beton Santrali Teknolojileri</div>
+          <div class="brandSub">Standart Maliyet Dönemi</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <a class="navItem active" href="#">
+          <span class="dot"></span> Maliyet
+        </a>
+      </nav>
+
+      <div class="sideCard">
+        <div class="sideCardTitle">İpuçları</div>
+        <ul class="sideCardList">
+          <li>Malzeme ara → listeden seç</li>
+          <li>Seçince KPI ve tablo güncellenir</li>
+          <li>CSV ile listeyi dışa aktar</li>
+        </ul>
+      </div>
+
+      <div class="footerNote">© 2026 • İç kullanım</div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <!-- Header -->
+      <header class="topbar">
+        <div>
+          <h1>Maliyet Analizi</h1>
+          <p class="muted">Malzeme bazlı maliyet kırılımı</p>
+        </div>
+
+        <div class="topActions">
+          <button class="btn ghost" id="btnTemizle" title="Seçimi ve filtreleri temizle">Temizle</button>
+          <button class="btn" id="btnGetir" disabled title="Seçili malzeme için veriyi getir">Seçimi Getir</button>
+        </div>
+      </header>
+
+      <!-- Filters -->
+      <section class="filters">
+        <div class="field grow">
+          <label>Malzeme Seç (No / Tanım / Site)</label>
+
+          <div class="acWrap">
+            <input id="secimArama" placeholder="Malzeme no veya tanım yaz... (örn: 1053112 / Lastik / MS...)"
+              autocomplete="off" />
+            <div id="secimDropdown" class="acDrop hidden"></div>
+          </div>
+
+          <div class="muted" style="margin-top:6px">
+            Yazmaya başlayınca listelenir. Seçince “Seçimi Getir” aktif olur.
+          </div>
+        </div>
+      </section>
+
+      <!-- KPI cards -->
+      <section class="kpis">
+        <div class="card kpi">
+          <div class="kpiTop">
+            <div class="kpiTitle">Toplam Maliyet (₺)</div>
+            <div class="pill">TR</div>
+          </div>
+          <div class="kpiValue" id="kpiToplam">-</div>
+          <div class="kpiSub muted" id="kpiSatir">-</div>
+        </div>
+
+        <div class="card kpi">
+          <div class="kpiTop">
+            <div class="kpiTitle">Malzeme (₺)</div>
+            <div class="pill">TR</div>
+          </div>
+          <div class="kpiValue" id="kpiMalzeme">-</div>
+          <div class="kpiSub muted">Toplam malzeme maliyeti</div>
+        </div>
+
+        <div class="card kpi">
+          <div class="kpiTop">
+            <div class="kpiTitle">İşçilik (₺)</div>
+            <div class="pill">TR</div>
+          </div>
+          <div class="kpiValue" id="kpiIscilik">-</div>
+          <div class="kpiSub muted">Toplam işçilik maliyeti</div>
+        </div>
+
+        <div class="card kpi">
+          <div class="kpiTop">
+            <div class="kpiTitle">Fason (₺)</div>
+            <div class="pill">TR</div>
+          </div>
+          <div class="kpiValue" id="kpiFason">-</div>
+          <div class="kpiSub muted">Toplam fason maliyeti</div>
+        </div>
+      </section>
+
+      <!-- Table -->
+      <section style="margin-top:14px">
+        <div class="card tableCard">
+          <div class="cardHead">
+            <div>
+              <div class="cardTitle">Detay Liste</div>
+              <div class="muted" id="listeDurum">Henüz veri yok</div>
+            </div>
+            <div class="tableActions">
+              <button class="btn small ghost" id="btnCSV">CSV İndir</button>
+            </div>
+          </div>
+
+          <div class="tableWrap">
+            <table id="tbl">
+              <thead>
+                <tr>
+                  <th>Site</th>
+                  <th>Malzeme No</th>
+                  <th>Konf</th>
+                  <th>Tanım</th>
+                  <th class="num">Toplam (₺)</th>
+                  <th class="num">Malzeme (₺)</th>
+                  <th class="num">İşçilik (₺)</th>
+                  <th class="num">Fason (₺)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="empty" colspan="8">Veri görmek için yukarıdan bir malzeme seç.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <div class="toast" id="toast"></div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="/js/maliyet.js"></script>
+</body>
+
+</html>

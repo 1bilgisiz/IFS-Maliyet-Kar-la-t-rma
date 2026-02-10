@@ -1,0 +1,6 @@
+@IfsDashboardApi_HostAddress = http://localhost:5056
+
+GET {{IfsDashboardApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
