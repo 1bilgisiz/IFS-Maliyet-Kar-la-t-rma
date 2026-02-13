@@ -22,7 +22,8 @@ public class IfsRepository : IIfsRepository
 
     public async Task<IEnumerable<T>> QueryAsync<T>(string sql, object? param = null)
     {
-        using var conn = CreateConnection();
+        await using var conn = (OracleConnection)CreateConnection();
+        await conn.OpenAsync();
         return await conn.QueryAsync<T>(sql, param);
     }
 }

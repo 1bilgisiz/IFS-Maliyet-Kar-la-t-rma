@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("IfsDashboardApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+de2530d7e9030c6776ca78145e746a6c2e5cc6d7")]
 [assembly: System.Reflection.AssemblyProductAttribute("IfsDashboardApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("IfsDashboardApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

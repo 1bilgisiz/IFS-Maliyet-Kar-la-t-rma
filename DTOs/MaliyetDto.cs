@@ -2,9 +2,8 @@ namespace IfsDashboardApi.DTOs;
 
 public class MaliyetDto
 {
-    public string Site { get; set; } = "";
-
-    public string MalzemeNo { get; set; } = "";
+    public string? Site { get; set; }
+    public string? MalzemeNo { get; set; }
     public string? KonfId { get; set; }
 
     public string? MalzemeTanim { get; set; }

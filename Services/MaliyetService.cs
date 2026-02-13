@@ -13,15 +13,16 @@ public class MaliyetService : IMaliyetService
         _repo = repo;
     }
 
-    public async Task<IEnumerable<MaliyetDto>> Liste(string? malzemeNo, string? konfId, string? site)
+    public async Task<IEnumerable<MaliyetDto>> Liste(string tepeKod)
     {
+        if (string.IsNullOrWhiteSpace(tepeKod))
+            throw new ArgumentException("Tepe kod zorunludur.", nameof(tepeKod));
+
         return await _repo.QueryAsync<MaliyetDto>(
             MaliyetQueries.TrStdCostPartOwr,
             new
             {
-                malzemeNo = string.IsNullOrWhiteSpace(malzemeNo) ? null : malzemeNo,
-                konfId = string.IsNullOrWhiteSpace(konfId) ? null : konfId,
-                site = string.IsNullOrWhiteSpace(site) ? null : site
+                tepeKod
             }
         );
     }

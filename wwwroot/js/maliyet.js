@@ -1,12 +1,6 @@
 let tumVeri = [];
 let chart;
 
-// Custom dropdown state
-let secenekler = [];           // { key, site, part, konf, tanim }
-let secilen = null;            // { key, site, part, konf, tanim }
-let aktifListe = [];           // dropdown'da gösterilen son liste
-let aktifIndex = -1;           // klavye ile seçim
-
 function trMoney(x) {
   const n = Number(x ?? 0);
   return n.toLocaleString("tr-TR", { maximumFractionDigits: 2 });
@@ -21,7 +15,7 @@ function toast(msg) {
   window.__t = setTimeout(() => (el.style.display = "none"), 2200);
 }
 
-// JSON key uyumu için küçük yardımcılar (snake_case veya PascalCase gelirse de çalışsın)
+// JSON key uyumu için küçük yardımcılar
 function val(r, ...keys) {
   for (const k of keys) {
     if (r && r[k] !== undefined && r[k] !== null) return r[k];
@@ -29,159 +23,44 @@ function val(r, ...keys) {
   return null;
 }
 
-function escapeHtml(s) {
-  return String(s ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
+function getTepeKod() {
+  return (document.getElementById("tepeKod")?.value || "").trim();
 }
 
-function getQueryString() {
-  // Backend şu an sabit bile olsa ileride parametreli olursa hazır dursun
-  return window.location.search || "";
-}
-
-async function veriCek() {
+async function veriCek(tepeKod) {
   const listeDurum = document.getElementById("listeDurum");
   if (listeDurum) listeDurum.textContent = "Veri çekiliyor...";
 
-  const url = `/api/maliyet${getQueryString()}`;
+  const url = `/api/maliyet/liste?tepeKod=${encodeURIComponent(tepeKod)}`;
   const res = await fetch(url);
 
   if (!res.ok) {
     const txt = await res.text();
-    toast("API hata: " + txt);
+    toast("API hata: " + (txt || res.status));
     if (listeDurum) listeDurum.textContent = "Hata";
+    tumVeri = [];
+    render();
     return;
   }
 
   tumVeri = await res.json();
-  if (listeDurum) listeDurum.textContent = `${tumVeri.length.toLocaleString("tr-TR")} satır`;
+
+  if (listeDurum) {
+    const adet = tumVeri.length.toLocaleString("tr-TR");
+    listeDurum.textContent = `Tepe Kod: ${tepeKod} • ${adet} satır`;
+  }
+
   toast("Veri geldi ✅");
-
-  secenekleriHazirla();
-  render();           // ilk yüklemede tüm veri görünür (istersen boş da bırakırız)
+  render();
 }
 
-function secenekleriHazirla() {
-  const uniq = new Map();
-
-  for (const r of tumVeri) {
-    const site = val(r, "site", "Site") ?? "";
-    const part = val(r, "malzeme_no", "malzemeNo", "Malzeme_No") ?? "";
-    const konf = val(r, "konf_id", "konfId", "Konf_Id") ?? "";
-    const tanim = val(r, "malzeme_tanim", "malzemeTanim", "Malzeme_Tanim") ?? "";
-
-    const key = `${site}||${part}||${konf}`;
-    if (!uniq.has(key)) uniq.set(key, { key, site, part, konf, tanim });
-  }
-
-  secenekler = Array.from(uniq.values()).sort((a, b) =>
-    String(a.part ?? "").localeCompare(String(b.part ?? ""), "tr")
-  );
-}
-
-function filtreSecenek(q) {
-  const s = (q || "").trim().toLowerCase();
-  if (!s) return secenekler.slice(0, 12);
-
-  return secenekler
-    .filter(x => (`${x.part} ${x.tanim} ${x.site}`).toLowerCase().includes(s))
-    .slice(0, 20);
-}
-
-/* ===== Dropdown render / kontrol ===== */
-
-function dropGoster(list) {
-  const dropdown = document.getElementById("secimDropdown");
-  if (!dropdown) return;
-
-  aktifListe = list;
-  aktifIndex = -1;
-
-  if (!list.length) {
-    dropdown.classList.add("hidden");
-    dropdown.innerHTML = "";
-    return;
-  }
-
-  dropdown.innerHTML = list.map(x => `
-    <div class="acItem" data-key="${escapeHtml(x.key)}">
-      <div class="acCode">${escapeHtml(x.part)}</div>
-      <div class="acText">${escapeHtml(x.tanim ?? "")}</div>
-      <div class="acSite">${escapeHtml(x.site ?? "")}</div>
-    </div>
-  `).join("");
-
-  dropdown.classList.remove("hidden");
-}
-
-function dropGizle() {
-  const dropdown = document.getElementById("secimDropdown");
-  dropdown?.classList.add("hidden");
-}
-
-function dropdownAcikMi() {
-  const dropdown = document.getElementById("secimDropdown");
-  return dropdown && !dropdown.classList.contains("hidden");
-}
-
-function dropdownAktifSatirGuncelle() {
-  const dropdown = document.getElementById("secimDropdown");
-  if (!dropdown) return;
-
-  const items = Array.from(dropdown.querySelectorAll(".acItem"));
-  items.forEach((el, i) => {
-    if (i === aktifIndex) el.style.background = "rgba(255,255,255,.07)";
-    else el.style.background = "";
-  });
-
-  // aktif öğe görünür kalsın
-  const activeEl = items[aktifIndex];
-  if (activeEl) activeEl.scrollIntoView({ block: "nearest" });
-}
-
-function secimiUygula(x) {
-  const input = document.getElementById("secimArama");
-  const btn = document.getElementById("btnGetir");
-
-  secilen = x;
-
-  if (input) {
-    input.value = `${x.part} • ${x.tanim ?? ""} • ${x.site}`.trim();
-  }
-
-  if (btn) btn.disabled = false;
-
-  dropGizle();
-}
-
-/* ===== Filtreleme / KPI / Tablo / Chart ===== */
-
-function filtreliVeri() {
-  // Seçim varsa yalnız onu getir
-  if (secilen) {
-    return tumVeri.filter(r => {
-      const site = String(val(r, "site", "Site") ?? "");
-      const part = String(val(r, "malzeme_no", "malzemeNo", "Malzeme_No") ?? "");
-      const konf = String(val(r, "konf_id", "konfId", "Konf_Id") ?? "");
-
-      return site === String(secilen.site ?? "") &&
-        part === String(secilen.part ?? "") &&
-        konf === String(secilen.konf ?? "");
-    });
-  }
-
-  // seçim yoksa tüm veri
-  return tumVeri;
-}
+/* ===== KPI / Tablo / Chart ===== */
 
 function kpiBas(data) {
-  const toplam = data.reduce((a, r) => a + Number(val(r, "toplam_maliyet_tr", "Toplam_Maliyet_Tr", "toplamMaliyetTr") ?? 0), 0);
-  const malz = data.reduce((a, r) => a + Number(val(r, "malzeme_mlyt_tr", "Malzeme_Mlyt_Tr", "malzemeMlytTr") ?? 0), 0);
-  const isc = data.reduce((a, r) => a + Number(val(r, "toplam_iscilik_tr", "Toplam_Iscilik_Tr", "toplamIscilikTr") ?? 0), 0);
-  const fas = data.reduce((a, r) => a + Number(val(r, "toplam_fason_mlyt_tr", "Toplam_Fason_Mlyt_Tr", "toplamFasonMlytTr") ?? 0), 0);
+  const toplam = data.reduce((a, r) => a + Number(val(r, "toplamMaliyetTr", "toplam_maliyet_tr", "Toplam_Maliyet_Tr") ?? 0), 0);
+  const malz = data.reduce((a, r) => a + Number(val(r, "malzemeMlytTr", "malzeme_mlyt_tr", "Malzeme_Mlyt_Tr") ?? 0), 0);
+  const isc = data.reduce((a, r) => a + Number(val(r, "toplamIscilikTr", "toplam_iscilik_tr", "Toplam_Iscilik_Tr") ?? 0), 0);
+  const fas = data.reduce((a, r) => a + Number(val(r, "toplamFasonMlytTr", "toplam_fason_mlyt_tr", "Toplam_Fason_Mlyt_Tr") ?? 0), 0);
 
   const elToplam = document.getElementById("kpiToplam");
   const elMalz = document.getElementById("kpiMalzeme");
@@ -189,15 +68,12 @@ function kpiBas(data) {
   const elFas = document.getElementById("kpiFason");
   const elSatir = document.getElementById("kpiSatir");
 
-  if (elToplam) elToplam.textContent = trMoney(toplam);
-  if (elMalz) elMalz.textContent = trMoney(malz);
-  if (elIsc) elIsc.textContent = trMoney(isc);
-  if (elFas) elFas.textContent = trMoney(fas);
+  if (elToplam) elToplam.textContent = data.length ? trMoney(toplam) : "-";
+  if (elMalz) elMalz.textContent = data.length ? trMoney(malz) : "-";
+  if (elIsc) elIsc.textContent = data.length ? trMoney(isc) : "-";
+  if (elFas) elFas.textContent = data.length ? trMoney(fas) : "-";
 
-  if (elSatir) {
-    const tag = secilen ? "Seçili malzeme" : "Tüm veri";
-    elSatir.textContent = `${data.length.toLocaleString("tr-TR")} satır • ${tag}`;
-  }
+  if (elSatir) elSatir.textContent = data.length ? `${data.length.toLocaleString("tr-TR")} satır` : "-";
 }
 
 function tabloBas(data) {
@@ -207,7 +83,7 @@ function tabloBas(data) {
   tbody.innerHTML = "";
 
   if (!data.length) {
-    tbody.innerHTML = `<tr><td class="empty" colspan="8">Kayıt bulunamadı</td></tr>`;
+    tbody.innerHTML = `<tr><td class="empty" colspan="8">Veri görmek için tepe kod girip “Getir”e bas.</td></tr>`;
     return;
   }
 
@@ -218,13 +94,13 @@ function tabloBas(data) {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${val(r, "site", "Site") ?? ""}</td>
-      <td>${val(r, "malzeme_no", "malzemeNo", "Malzeme_No") ?? ""}</td>
-      <td>${val(r, "konf_id", "konfId", "Konf_Id") ?? ""}</td>
-      <td>${val(r, "malzeme_tanim", "malzemeTanim", "Malzeme_Tanim") ?? ""}</td>
-      <td class="num">${trMoney(val(r, "toplam_maliyet_tr", "Toplam_Maliyet_Tr", "toplamMaliyetTr"))}</td>
-      <td class="num">${trMoney(val(r, "malzeme_mlyt_tr", "Malzeme_Mlyt_Tr", "malzemeMlytTr"))}</td>
-      <td class="num">${trMoney(val(r, "toplam_iscilik_tr", "Toplam_Iscilik_Tr", "toplamIscilikTr"))}</td>
-      <td class="num">${trMoney(val(r, "toplam_fason_mlyt_tr", "Toplam_Fason_Mlyt_Tr", "toplamFasonMlytTr"))}</td>
+      <td>${val(r, "malzemeNo", "malzeme_no", "Malzeme_No") ?? ""}</td>
+      <td>${val(r, "konfId", "konf_id", "Konf_Id") ?? ""}</td>
+      <td>${val(r, "malzemeTanim", "malzeme_tanim", "Malzeme_Tanim") ?? ""}</td>
+      <td class="num">${trMoney(val(r, "toplamMaliyetTr", "toplam_maliyet_tr", "Toplam_Maliyet_Tr"))}</td>
+      <td class="num">${trMoney(val(r, "malzemeMlytTr", "malzeme_mlyt_tr", "Malzeme_Mlyt_Tr"))}</td>
+      <td class="num">${trMoney(val(r, "toplamIscilikTr", "toplam_iscilik_tr", "Toplam_Iscilik_Tr"))}</td>
+      <td class="num">${trMoney(val(r, "toplamFasonMlytTr", "toplam_fason_mlyt_tr", "Toplam_Fason_Mlyt_Tr"))}</td>
     `;
     tbody.appendChild(tr);
   }
@@ -237,14 +113,13 @@ function tabloBas(data) {
 }
 
 function chartBas(data) {
-  // HTML'de canvas yoksa çık (sen şimdilik chart göstermiyorsun gibi)
   const canvas = document.getElementById("siteChart");
   if (!canvas || typeof Chart === "undefined") return;
 
   const bySite = new Map();
   for (const r of data) {
     const k = val(r, "site", "Site") ?? "Bilinmiyor";
-    const v = Number(val(r, "toplam_maliyet_tr", "Toplam_Maliyet_Tr", "toplamMaliyetTr") ?? 0);
+    const v = Number(val(r, "toplamMaliyetTr", "toplam_maliyet_tr", "Toplam_Maliyet_Tr") ?? 0);
     bySite.set(k, (bySite.get(k) ?? 0) + v);
   }
 
@@ -267,7 +142,7 @@ function chartBas(data) {
 }
 
 function render() {
-  const data = filtreliVeri();
+  const data = tumVeri || [];
   kpiBas(data);
   tabloBas(data);
   chartBas(data);
@@ -275,135 +150,111 @@ function render() {
 
 /* ===== Actions ===== */
 
-function csvIndir() {
-  const data = filtreliVeri();
+function csvIndirExcel() {
+  const data = tumVeri || [];
   if (!data.length) return toast("CSV için veri yok");
 
+  const sep = ";";
+
   const cols = [
-    ["site", "Site", ["site", "Site"]],
-    ["malzeme_no", "Malzeme No", ["malzeme_no", "malzemeNo", "Malzeme_No"]],
-    ["konf_id", "Konf Id", ["konf_id", "konfId", "Konf_Id"]],
-    ["malzeme_tanim", "Malzeme Tanım", ["malzeme_tanim", "malzemeTanim", "Malzeme_Tanim"]],
-    ["toplam_maliyet_tr", "Toplam TR", ["toplam_maliyet_tr", "toplamMaliyetTr", "Toplam_Maliyet_Tr"]],
-    ["malzeme_mlyt_tr", "Malzeme TR", ["malzeme_mlyt_tr", "malzemeMlytTr", "Malzeme_Mlyt_Tr"]],
-    ["toplam_iscilik_tr", "İşçilik TR", ["toplam_iscilik_tr", "toplamIscilikTr", "Toplam_Iscilik_Tr"]],
-    ["toplam_fason_mlyt_tr", "Fason TR", ["toplam_fason_mlyt_tr", "toplamFasonMlytTr", "Toplam_Fason_Mlyt_Tr"]],
+    ["Site", (r) => val(r, "site", "Site")],
+    ["Malzeme No", (r) => val(r, "malzemeNo", "malzeme_no", "Malzeme_No")],
+    ["Konf", (r) => val(r, "konfId", "konf_id", "Konf_Id")],
+    ["Tanım", (r) => val(r, "malzemeTanim", "malzeme_tanim", "Malzeme_Tanim")],
+    ["Toplam (₺)", (r) => val(r, "toplamMaliyetTr", "toplam_maliyet_tr", "Toplam_Maliyet_Tr")],
+    ["Malzeme (₺)", (r) => val(r, "malzemeMlytTr", "malzeme_mlyt_tr", "Malzeme_Mlyt_Tr")],
+    ["İşçilik (₺)", (r) => val(r, "toplamIscilikTr", "toplam_iscilik_tr", "Toplam_Iscilik_Tr")],
+    ["Fason (₺)", (r) => val(r, "toplamFasonMlytTr", "toplam_fason_mlyt_tr", "Toplam_Fason_Mlyt_Tr")],
   ];
 
-  const esc = (s) => `"${String(s ?? "").replaceAll('"', '""')}"`;
-  const header = cols.map(c => esc(c[1])).join(",");
+  // Excel için: Türkçe ondalık virgül + binlik nokta
+  function trNumber(x) {
+    if (x === null || x === undefined || x === "") return "";
+    const n = Number(x);
+    if (Number.isNaN(n)) return String(x);
+    // binlik ayraç ve ondalık virgül
+    return n.toLocaleString("tr-TR", { maximumFractionDigits: 6 });
+  }
 
-  const rows = data.map(r => cols.map(c => esc(val(r, ...c[2]))).join(","));
-  const csv = [header, ...rows].join("\n");
+  function esc(s) {
+    const str = String(s ?? "");
+    // ; veya " veya satır sonu varsa çift tırnakla kaçır
+    if (str.includes('"') || str.includes("\n") || str.includes("\r") || str.includes(sep)) {
+      return `"${str.replaceAll('"', '""')}"`;
+    }
+    return str;
+  }
+
+  const header = cols.map(c => esc(c[0])).join(sep);
+
+  const rows = data.map(r => {
+    return cols.map(([_, fn]) => {
+      const v = fn(r);
+
+      // sayısal kolonları TR format yaz
+      if (typeof v === "number") return esc(trNumber(v));
+      // number string gelirse de çevirmeyi dene
+      if (v !== null && v !== undefined && v !== "" && !isNaN(Number(v))) return esc(trNumber(v));
+
+      return esc(v);
+    }).join(sep);
+  });
+
+  // UTF-8 BOM: Excel Türkçe karakterleri düzgün açsın
+  const bom = "\uFEFF";
+  const csv = bom + [header, ...rows].join("\r\n");
 
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "maliyet.csv";
+  a.download = "maliyet_excel.csv";
   a.click();
   URL.revokeObjectURL(a.href);
 
-  toast("CSV indirildi ✅");
+  toast("Excel uyumlu CSV indirildi ✅");
 }
 
 function temizle() {
-  const input = document.getElementById("secimArama");
+  const input = document.getElementById("tepeKod");
   const btn = document.getElementById("btnGetir");
 
-  secilen = null;
   if (input) input.value = "";
   if (btn) btn.disabled = true;
 
-  dropGizle();
+  tumVeri = [];
+  const listeDurum = document.getElementById("listeDurum");
+  if (listeDurum) listeDurum.textContent = "Henüz veri yok";
+
   render();
-  toast("Seçim temizlendi");
+  toast("Temizlendi");
 }
 
-function secimiGetir() {
-  if (!secilen) return toast("Listeden bir malzeme seçmelisin");
-  render();
-  toast("Seçim uygulandı ✅");
+function getirTik() {
+  const tepeKod = getTepeKod();
+  if (!tepeKod) return toast("Tepe kod giriniz.");
+  veriCek(tepeKod);
 }
 
 /* ===== Events ===== */
 
 document.addEventListener("DOMContentLoaded", () => {
-  const input = document.getElementById("secimArama");
-  const dropdown = document.getElementById("secimDropdown");
+  const input = document.getElementById("tepeKod");
   const btnGetir = document.getElementById("btnGetir");
 
   document.getElementById("btnTemizle")?.addEventListener("click", temizle);
-  document.getElementById("btnCSV")?.addEventListener("click", csvIndir);
-  btnGetir?.addEventListener("click", secimiGetir);
+  document.getElementById("btnCSV")?.addEventListener("click", csvIndirExcel);
+  btnGetir?.addEventListener("click", getirTik);
 
-  // input yazdıkça dropdown filtrele
   input?.addEventListener("input", () => {
-    const list = filtreSecenek(input.value);
-
-    // kullanıcı yazmaya başladıysa eski seçimi iptal et (çok önemli UX)
-    secilen = null;
-    if (btnGetir) btnGetir.disabled = true;
-
-    dropGoster(list);
+    if (btnGetir) btnGetir.disabled = !input.value.trim();
   });
 
-  // klavye kontrolleri
   input?.addEventListener("keydown", (e) => {
-    if (!dropdownAcikMi()) {
-      // aşağı ok ile aç
-      if (e.key === "ArrowDown") {
-        const list = filtreSecenek(input.value);
-        dropGoster(list);
-        e.preventDefault();
-      }
-      return;
-    }
-
-    if (e.key === "Escape") {
-      dropGizle();
-      e.preventDefault();
-      return;
-    }
-
-    if (e.key === "ArrowDown") {
-      aktifIndex = Math.min(aktifIndex + 1, aktifListe.length - 1);
-      dropdownAktifSatirGuncelle();
-      e.preventDefault();
-      return;
-    }
-
-    if (e.key === "ArrowUp") {
-      aktifIndex = Math.max(aktifIndex - 1, 0);
-      dropdownAktifSatirGuncelle();
-      e.preventDefault();
-      return;
-    }
-
     if (e.key === "Enter") {
-      // aktif yoksa ilkini seç
-      const pick = aktifListe[aktifIndex >= 0 ? aktifIndex : 0];
-      if (pick) secimiUygula(pick);
-      e.preventDefault();
-      return;
+      if (!btnGetir?.disabled) getirTik();
     }
   });
 
-  // dropdown click
-  dropdown?.addEventListener("click", (e) => {
-    const item = e.target.closest(".acItem");
-    if (!item) return;
 
-    const key = item.getAttribute("data-key");
-    const x = secenekler.find(s => s.key === key);
-    if (!x) return;
-
-    secimiUygula(x);
-  });
-
-  // dışarı tıklayınca kapat
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest(".acWrap")) dropGizle();
-  });
-
-  veriCek();
+  render();
 });

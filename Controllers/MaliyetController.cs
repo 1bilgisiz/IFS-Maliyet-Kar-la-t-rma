@@ -14,10 +14,13 @@ public class MaliyetController : ControllerBase
         _service = service;
     }
 
-    [HttpGet]
-    public async Task<IActionResult> Get([FromQuery] string? malzemeNo, [FromQuery] string? konfId, [FromQuery] string? site)
+    [HttpGet("liste")]
+    public async Task<IActionResult> Liste([FromQuery] string? tepeKod)
     {
-        var data = await _service.Liste(malzemeNo, konfId, site);
+        if (string.IsNullOrWhiteSpace(tepeKod))
+            return BadRequest("tepeKod zorunludur.");
+
+        var data = await _service.Liste(tepeKod);
         return Ok(data);
     }
 }

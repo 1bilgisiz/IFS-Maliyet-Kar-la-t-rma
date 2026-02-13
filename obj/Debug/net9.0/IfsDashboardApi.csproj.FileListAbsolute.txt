@@ -29,12 +29,14 @@ C:\Users\saniye.bilgic\Desktop\projeIFS\IfsDashboardApi\obj\Debug\net9.0\IfsDash
 C:\Users\saniye.bilgic\Desktop\projeIFS\IfsDashboardApi\obj\Debug\net9.0\IfsDashboardApi.csproj.CoreCompileInputs.cache
 C:\Users\saniye.bilgic\Desktop\projeIFS\IfsDashboardApi\obj\Debug\net9.0\IfsDashboardApi.MvcApplicationPartsAssemblyInfo.cs
 C:\Users\saniye.bilgic\Desktop\projeIFS\IfsDashboardApi\obj\Debug\net9.0\IfsDashboardApi.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\saniye.bilgic\Desktop\projeIFS\IfsDashboardApi\obj\Debug\net9.0\IfsDashboardApi.sourcelink.json
 C:\Users\saniye.bilgic\Desktop\projeIFS\IfsDashboardApi\obj\Debug\net9.0\rjimswa.dswa.cache.json
 C:\Users\saniye.bilgic\Desktop\projeIFS\IfsDashboardApi\obj\Debug\net9.0\rjsmrazor.dswa.cache.json
 C:\Users\saniye.bilgic\Desktop\projeIFS\IfsDashboardApi\obj\Debug\net9.0\rjsmcshtml.dswa.cache.json
 C:\Users\saniye.bilgic\Desktop\projeIFS\IfsDashboardApi\obj\Debug\net9.0\scopedcss\bundle\IfsDashboardApi.styles.css
-C:\Users\saniye.bilgic\Desktop\projeIFS\IfsDashboardApi\obj\Debug\net9.0\compressed\lvz1j1a8r4-r5e0wppc1w.gz
-C:\Users\saniye.bilgic\Desktop\projeIFS\IfsDashboardApi\obj\Debug\net9.0\compressed\ua71jxm2wf-jjj4zejnoc.gz
+C:\Users\saniye.bilgic\Desktop\projeIFS\IfsDashboardApi\obj\Debug\net9.0\compressed\lvz1j1a8r4-20deypiy3c.gz
+C:\Users\saniye.bilgic\Desktop\projeIFS\IfsDashboardApi\obj\Debug\net9.0\compressed\ua71jxm2wf-8m2i1x1qdr.gz
+C:\Users\saniye.bilgic\Desktop\projeIFS\IfsDashboardApi\obj\Debug\net9.0\compressed\9jkm6o74o1-gr8zjsam3r.gz
 C:\Users\saniye.bilgic\Desktop\projeIFS\IfsDashboardApi\obj\Debug\net9.0\staticwebassets.build.json
 C:\Users\saniye.bilgic\Desktop\projeIFS\IfsDashboardApi\obj\Debug\net9.0\staticwebassets.build.json.cache
 C:\Users\saniye.bilgic\Desktop\projeIFS\IfsDashboardApi\obj\Debug\net9.0\staticwebassets.development.json
@@ -45,4 +47,3 @@ C:\Users\saniye.bilgic\Desktop\projeIFS\IfsDashboardApi\obj\Debug\net9.0\refint\
 C:\Users\saniye.bilgic\Desktop\projeIFS\IfsDashboardApi\obj\Debug\net9.0\IfsDashboardApi.pdb
 C:\Users\saniye.bilgic\Desktop\projeIFS\IfsDashboardApi\obj\Debug\net9.0\IfsDashboardApi.genruntimeconfig.cache
 C:\Users\saniye.bilgic\Desktop\projeIFS\IfsDashboardApi\obj\Debug\net9.0\ref\IfsDashboardApi.dll
-C:\Users\saniye.bilgic\Desktop\projeIFS\IfsDashboardApi\obj\Debug\net9.0\compressed\9jkm6o74o1-66pav5t007.gz

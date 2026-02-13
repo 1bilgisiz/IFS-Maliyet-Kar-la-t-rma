@@ -29,9 +29,9 @@
       <div class="sideCard">
         <div class="sideCardTitle">İpuçları</div>
         <ul class="sideCardList">
-          <li>Malzeme ara → listeden seç</li>
-          <li>Seçince KPI ve tablo güncellenir</li>
-          <li>CSV ile listeyi dışa aktar</li>
+          <li>Tepe kodu gir → Getir butonuna bas</li>
+          <li>KPI ve tablo güncellenir</li>
+          <li>Excel aktarımı yapılabilir</li>
         </ul>
       </div>
 
@@ -44,28 +44,23 @@
       <header class="topbar">
         <div>
           <h1>Maliyet Analizi</h1>
-          <p class="muted">Malzeme bazlı maliyet kırılımı</p>
+          <p class="muted">Tepe kod bazlı maliyet kırılımı</p>
         </div>
 
         <div class="topActions">
-          <button class="btn ghost" id="btnTemizle" title="Seçimi ve filtreleri temizle">Temizle</button>
-          <button class="btn" id="btnGetir" disabled title="Seçili malzeme için veriyi getir">Seçimi Getir</button>
+          <button class="btn ghost" id="btnTemizle" title="Alanı temizle">Temizle</button>
+          <button class="btn ghost" id="btnCSV" title="CSV indir">Excel İndir</button>
+          <button class="btn" id="btnGetir" disabled title="Tepe kod için veriyi getir">Getir</button>
         </div>
       </header>
 
       <!-- Filters -->
       <section class="filters">
         <div class="field grow">
-          <label>Malzeme Seç (No / Tanım / Site)</label>
-
-          <div class="acWrap">
-            <input id="secimArama" placeholder="Malzeme no veya tanım yaz... (örn: 1053112 / Lastik / MS...)"
-              autocomplete="off" />
-            <div id="secimDropdown" class="acDrop hidden"></div>
-          </div>
-
+          <label>Tepe Kod</label>
+          <input id="tepeKod" placeholder="Tepe kod gir (örn: 1053112)" autocomplete="off" />
           <div class="muted" style="margin-top:6px">
-            Yazmaya başlayınca listelenir. Seçince “Seçimi Getir” aktif olur.
+            Tepe kodu girince “Getir” aktif olur. Enter ile de getirebilirsin.
           </div>
         </div>
       </section>
@@ -108,7 +103,6 @@
           <div class="kpiSub muted">Toplam fason maliyeti</div>
         </div>
       </section>
-
       <!-- Table -->
       <section style="margin-top:14px">
         <div class="card tableCard">
@@ -116,9 +110,6 @@
             <div>
               <div class="cardTitle">Detay Liste</div>
               <div class="muted" id="listeDurum">Henüz veri yok</div>
-            </div>
-            <div class="tableActions">
-              <button class="btn small ghost" id="btnCSV">CSV İndir</button>
             </div>
           </div>
 
@@ -138,7 +129,7 @@
               </thead>
               <tbody>
                 <tr>
-                  <td class="empty" colspan="8">Veri görmek için yukarıdan bir malzeme seç.</td>
+                  <td class="empty" colspan="8">Veri görmek için tepe kod girip “Getir”e bas.</td>
                 </tr>
               </tbody>
             </table>
@@ -150,8 +141,7 @@
     </main>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="/js/maliyet.js"></script>
+  <script src="/js/maliyet.js?v=2"></script>
 </body>
 
 </html>
